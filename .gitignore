@@ -1,1 +1,42 @@
-﻿
+﻿## Build artifacts
+bin/
+obj/
+
+## User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider
+.idea/
+
+## VS Code
+.vscode/
+
+## ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+## Logs
+*.log
+
+## OS generated files
+.DS_Store
+Thumbs.db
+
+## dotnet CLI artifacts
+project.lock.json
+project.fragment.lock.json
+
+## Visual Studio working folder
+.vs/
+
+## NuGet
+*.nupkg
+packages/
+.nuget/
+
+## Others
+wwwroot/lib/
+node_modules/
+.env
