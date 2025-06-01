@@ -1,0 +1,65 @@
+﻿@model IEnumerable<Coursify.Models.Course>
+
+@{
+    ViewData["Title"] = "Courses";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if(User.Identity.Name == "admin@admin.com")
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+}
+
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-inline pull-right">
+            <label>Search</label>
+            <input type="text" class="form-control" id="txtSearch" placeholder="Search by any name or category"/>
+        </div>
+    </div>
+    <div id="grdCourses">
+        @await Html.PartialAsync("_GridView", Model)
+    </div>
+</div>
+@section Scripts{
+    <script>
+        $(() => {
+            getCourses();
+
+            $('#txtSearch').on('keyup', function() {
+                getCourses();
+            });
+        });
+
+        function getCourses(){
+            $.ajax({
+                url: '@Url.Action("SearchCourses", "Courses")',
+                datatype: 'html',
+                method: 'GET',
+                data: { searchText: $('#txtSearch').val() },
+                success: function(res) {
+                    $('#grdCourses').html('').html(res);
+                    $('#coursesTable').DataTable({
+                        destroy: true, // ważne: pozwala na ponowną inicjalizację
+                        scrollY: "450px",
+                        scrollCollapse: true,
+                        paging: true,
+                        searching: false
+                    });
+                },
+                error: function(err){
+                    console.error("Error fetching courses:", err);
+                }
+            })
+        }
+    </script>
+}
+
+
+
+

@@ -1,0 +1,132 @@
+﻿@model Coursify.Models.Course
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<Coursify.Areas.Identity.Data.AppUser> UserManager
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentUserId = UserManager.GetUserId(User);
+}
+
+
+<h1>Details</h1>
+
+<div>
+    <h4>Course</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Category)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Category)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Details)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Details)
+        </dd>
+    </dl>
+</div>
+<div>
+    <p>
+        Enrolled last week: <strong>@ViewBag.EnrolledLastWeek</strong><br />
+        Enrolled all time: <strong>@ViewBag.EnrolledAllTime</strong>
+    </p>
+</div>
+
+<div>
+    <div class="col-sm-12">
+        <table id="quizzesTable" class="table table-sm table-bordered">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Level</th>
+                    <th>Solved by</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in (List<Coursify.Models.Quiz>)ViewBag.Quizzes)
+                {
+                    var isSolved = item.UserQuizzes?.Any(uq => uq.UserId == currentUserId) ?? false;
+
+                    <tr>
+                        <td>@item.Title</td>
+                        <td>@item.Level</td>
+                        <td>@item.UserQuizzes?.Count</td>
+                        <td>
+                            @if (isSolved)
+                            {
+                                <span>Solved</span>
+                            }
+                            else
+                            {
+                                <a asp-action="Solve" asp-controller="Quizzes" asp-route-id="@item.Id">Solve</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div>
+    @if (!Model.Ratings.Any(r => r.Comment.Author.Equals(User.Identity.Name)))
+    {
+        <a asp-action="Create" asp-controller="Ratings" asp-route-courseId="@Model.Id">Rate </a>
+        <a> | </a>
+    }
+    <a asp-action="MyCourses">Back to my courses</a>
+</div>
+
+
+
+@if (Model.Ratings != null && Model.Ratings.Any())
+{
+    <h4>Ratings</h4>
+    <ul class="list-group mb-3">
+        @foreach (var rating in Model.Ratings)
+        {
+            <li class="list-group-item">
+                <strong>@rating.Stars ★</strong>
+                @if (rating.Comment != null)
+                {
+                    <div><strong>@rating.Comment.Title</strong></div>
+                    <div>@rating.Comment.Description</div>
+                    <small class="text-muted">Autor: @rating.Comment.Author</small>
+                    @if (rating.Comment.Author.Equals(User.Identity.Name))
+                    {
+                        <a asp-action="Edit" asp-controller="Ratings" asp-route-courseId="@Model.Id">Edit</a>
+                        <a> | </a>
+                        <a asp-action="Delete" asp-controller="Ratings" asp-route-courseId="@Model.Id">Delete</a>
+                    }
+                }
+            </li>
+        }
+    </ul>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#quizzesTable').DataTable({
+                paging: false,
+                scrollY: '450px',
+                scrollCollapse: true,
+                ordering: true,
+                searching: false 
+            });
+        });
+    </script>
+}
+
