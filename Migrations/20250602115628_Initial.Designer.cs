@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coursify.Migrations
 {
     [DbContext(typeof(CoursifyContext))]
-    [Migration("20250531195313_UpdateCommentAuthor")]
-    partial class UpdateCommentAuthor
+    [Migration("20250602115628_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,6 +27,10 @@ namespace Coursify.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ApiToken")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -93,6 +97,7 @@ namespace Coursify.Migrations
             modelBuilder.Entity("Coursify.Models.Comment", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Author")
@@ -111,6 +116,9 @@ namespace Coursify.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RatingId")
+                        .IsUnique();
 
                     b.ToTable("Comment");
                 });
@@ -137,16 +145,44 @@ namespace Coursify.Migrations
                     b.ToTable("Courses");
                 });
 
+            modelBuilder.Entity("Coursify.Models.Quiz", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("Quiz");
+                });
+
             modelBuilder.Entity("Coursify.Models.Rating", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("CourseId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Stars")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
 
                     b.ToTable("Rating");
                 });
@@ -167,6 +203,27 @@ namespace Coursify.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("UserCourses");
+                });
+
+            modelBuilder.Entity("Coursify.Models.UserQuiz", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("QuizId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CompletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Score")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("UserId", "QuizId");
+
+                    b.HasIndex("QuizId");
+
+                    b.ToTable("UserQuizzes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -244,11 +301,9 @@ namespace Coursify.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ProviderKey")
-                        .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ProviderDisplayName")
@@ -286,11 +341,9 @@ namespace Coursify.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Value")
@@ -305,11 +358,33 @@ namespace Coursify.Migrations
                 {
                     b.HasOne("Coursify.Models.Rating", "Rating")
                         .WithOne("Comment")
-                        .HasForeignKey("Coursify.Models.Comment", "Id")
+                        .HasForeignKey("Coursify.Models.Comment", "RatingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Rating");
+                });
+
+            modelBuilder.Entity("Coursify.Models.Quiz", b =>
+                {
+                    b.HasOne("Coursify.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("Coursify.Models.Rating", b =>
+                {
+                    b.HasOne("Coursify.Models.Course", "Course")
+                        .WithMany("Ratings")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Coursify.Models.UserCourse", b =>
@@ -327,6 +402,25 @@ namespace Coursify.Migrations
                         .IsRequired();
 
                     b.Navigation("Course");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Coursify.Models.UserQuiz", b =>
+                {
+                    b.HasOne("Coursify.Models.Quiz", "Quiz")
+                        .WithMany("UserQuizzes")
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Coursify.Areas.Identity.Data.AppUser", "User")
+                        .WithMany("UserQuizzes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quiz");
 
                     b.Navigation("User");
                 });
@@ -385,11 +479,20 @@ namespace Coursify.Migrations
             modelBuilder.Entity("Coursify.Areas.Identity.Data.AppUser", b =>
                 {
                     b.Navigation("UserCourses");
+
+                    b.Navigation("UserQuizzes");
                 });
 
             modelBuilder.Entity("Coursify.Models.Course", b =>
                 {
+                    b.Navigation("Ratings");
+
                     b.Navigation("UserCourses");
+                });
+
+            modelBuilder.Entity("Coursify.Models.Quiz", b =>
+                {
+                    b.Navigation("UserQuizzes");
                 });
 
             modelBuilder.Entity("Coursify.Models.Rating", b =>

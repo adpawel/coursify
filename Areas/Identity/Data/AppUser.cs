@@ -13,7 +13,8 @@ public class AppUser : IdentityUser
     [PersonalData]
     public string? FirstName { get; set; }
     [PersonalData]
-    public string? LastName { get; set; }
+    public string? LastName { get; set; } 
+    public string ApiToken { get; set; } = Guid.NewGuid().ToString();
     public ICollection<UserCourse>? UserCourses { get; set; }
     public ICollection<UserQuiz>? UserQuizzes { get; set; }
 

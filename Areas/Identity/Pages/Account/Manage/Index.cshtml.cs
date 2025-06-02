@@ -31,6 +31,7 @@ namespace Coursify.Areas.Identity.Pages.Account.Manage
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public string Username { get; set; }
+        public string ApiToken { get; set; }
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -67,6 +68,7 @@ namespace Coursify.Areas.Identity.Pages.Account.Manage
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
             Username = userName;
+            ApiToken = user.ApiToken; // Assuming ApiToken is a property of AppUser
 
             Input = new InputModel
             {

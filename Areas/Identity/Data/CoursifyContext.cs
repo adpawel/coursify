@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 
 namespace Coursify.Data;
 
-public class CoursifyContext : IdentityDbContext<AppUser>
+public class CoursifyContext : IdentityDbContext<AppUser, IdentityRole, string>
 {
     public CoursifyContext(DbContextOptions<CoursifyContext> options)
         : base(options)
