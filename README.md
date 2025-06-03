@@ -14,16 +14,37 @@
 - Zapamiętywanie wykonanych quizów przez użytkowników
 - System ocen i komentarzy do kursów
 - Tabela wyników (Leaderboard) z rankingiem użytkowników
+- **REST API** do zarządzania kursami, quizami i komentarzami (CRUD + uwierzytelnianie tokenem)
 
 ---
 
-## Baza danych - tabele
-- Comment
-- Courses
-- Quiz
-- Rating
-- UserCourses
-- UserQuizzes
+## 🗂️ REST API
+
+Udostępniono REST API umożliwiające wykonywanie podstawowych operacji **CRUD** dla:
+
+- Kursów (`Courses`)
+- Quizów (`Quizzes`)
+- Komentarzy (`Comments`)
+
+### 🔐 Uwierzytelnianie
+
+Dostęp do API wymaga podania:
+
+- **Nazwy użytkownika**
+- **Tokenu uwierzytelniającego** (unikalnie generowanego dla każdego użytkownika po rejestracji)
+
+Token można uzyskać w panelu użytkownika po zalogowaniu się.
+
+---
+
+## 🧾 Baza danych – tabele
+
+- `Comment`
+- `Courses`
+- `Quiz`
+- `Rating`
+- `UserCourses`
+- `UserQuizzes`
 
 ---
 
@@ -31,16 +52,17 @@
 
 - ASP.NET Core MVC
 - Entity Framework Core
-- sqlite (lub inna baza danych)
+- SQLite (lub inna baza danych)
 - Bootstrap + jQuery + DataTables
 - ASP.NET Identity (zarządzanie użytkownikami)
+- REST API (z autoryzacją tokenową)
 
 ---
 
 ## 📦 Struktura projektu
 
 - `Models/` – modele danych (Course, Quiz, UserQuiz, Rating, Comment itp.)
-- `Controllers/` – kontrolery obsługujące logikę (CoursesController, QuizzesController, RatingsController)
+- `Controllers/` – kontrolery obsługujące logikę (CoursesController, QuizzesController, RatingsController, ApiController)
 - `Views/` – widoki Razor (.cshtml)
 - `wwwroot/` – zasoby statyczne (JS, CSS)
 - `Data/` – kontekst bazy danych (CoursifyContext)
@@ -72,7 +94,6 @@
     ```
     https://localhost:5001
     ```
-
 ---
 
 ## 📊 Ranking użytkowników (Leaderboard)
