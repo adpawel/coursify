@@ -76,10 +76,11 @@
 
 //app.Run();
 
+using Coursify.Areas.Identity.Data;
+using Coursify.Data;
+using Coursify.Middleware;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Coursify.Data;
-using Coursify.Areas.Identity.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("CoursifyContextConnection") ?? throw new InvalidOperationException("Connection string 'CoursifyContextConnection' not found."); ;
@@ -92,7 +93,23 @@ builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireCo
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<CoursifyContext>();
+    db.Database.Migrate(); 
+    DbInitializer.Seed(db); 
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -103,12 +120,14 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 app.UseRouting();
+app.UseMiddleware<ApiKeyAuthMiddleware>();
 
 app.UseAuthorization();
 
 app.MapStaticAssets();
-
+app.MapControllers();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
